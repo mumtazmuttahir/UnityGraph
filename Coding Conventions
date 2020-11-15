@@ -1,0 +1,21 @@
+Classes
+Casing: Pascal Case
+e.g. public class MyClass : MonoBehaviour { }
+
+Methods
+Casing: Pascal Case (No Underscores unless it’s a Unit Test)
+e.g. private void HandleWeaponReady()
+
+Private Fields
+Casing: camelCase – with optional underscore prefix
+// Either
+private int maxAmmo;
+// OR my prefered
+private int _maxAmmo;
+
+Public Fields
+Casing: Pascal Case
+public int ReaminingAmmoInClip { get; private set; }
+
+Reference:
+https://unity3d.college/2016/05/16/unity-coding-standards/
