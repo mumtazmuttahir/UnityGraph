@@ -56,7 +56,7 @@ public class GraphWindow : MonoBehaviour
         
     }
 
-    private void CreateDot (Vector2 _anchoredPosition) {
+    private GameObject CreateDot (Vector2 _anchoredPosition) {
         //There are 3 types of constructor for a GameObject instance
         //1. GameObject(); => without any arguements
         //2. GameObject(string name); => with name only
@@ -79,6 +79,7 @@ public class GraphWindow : MonoBehaviour
         rt.sizeDelta = new Vector2(11,11);
         rt.anchorMin = new Vector2(0,0);
         rt.anchorMax = new Vector2(0,0);
+        return dotGameObject;
     }
 
     private void ShowGraphOnTheScreen (List<int> _valueList) {
@@ -87,6 +88,8 @@ public class GraphWindow : MonoBehaviour
         // maximum height of the dot
         float yMax = 100.0f;
         float graphHeight = graphPoints.sizeDelta.y;
+        //Reference to the previous gameobject for connection
+        GameObject previousDotGameObject = null;
 
         for(int index = 0; index <_valueList.Count; index++) {
             //Calculate x position of the dot
@@ -96,19 +99,49 @@ public class GraphWindow : MonoBehaviour
             //Create a vector out of the above positions
             Vector2 position = new Vector2(xPos, yPos);
             //Create a dot on the above calculated position
-            CreateDot(position);
+            GameObject dotGameObject = CreateDot(position);
+            //Creating connection
+            if (previousDotGameObject != null) {
+                CreateDotConnection (previousDotGameObject.GetComponent<RectTransform>().anchoredPosition,
+                dotGameObject.GetComponent<RectTransform>().anchoredPosition,
+                previousDotGameObject,
+                dotGameObject);
+            }
+            previousDotGameObject = dotGameObject;
         }
     }
 
-    private void CreateDotConnection (Vector2 _dotPostionA, Vector2 _dotPositionB) {
+    private void CreateDotConnection (Vector2 _dotPositionA, 
+                                        Vector2 _dotPositionB,
+                                        GameObject _previousGameObject,
+                                        GameObject _currentGameObject) {
         GameObject dotConGameObject = new GameObject("dotConnection", typeof(Image));
         dotConGameObject.transform.SetParent(graphPoints, false);
         RectTransform rt = dotConGameObject.GetComponent<RectTransform>();
-        rt.anchoredPosition = _dotPostionA;
-        rt.sizeDelta = new Vector2(100.0f,3.0f);
+        //Set the direction
+        Vector2 connectionDirection = (_dotPositionB - _dotPositionA);
+        Vector2 normalizedVector = connectionDirection.normalized;
+        float distance = Vector2.Distance(_dotPositionA, _dotPositionB);
+        //Set the parameters
         rt.anchorMin = new Vector2(0,0);
         rt.anchorMax = new Vector2(0,0);
+        rt.sizeDelta = new Vector2(distance,3.0f);
+        rt.anchoredPosition = _dotPositionA + normalizedVector * distance * 0.5f;
+        //Rotate the connection
+        // Atan2 calculates the arc tangent of the vector in all 4 quadrants
+        // Mathf.Rad2Deg convets the angle from randians to degrees
+        //TODO: atan2 code will be given later
+        float angle = Mathf.Atan2(normalizedVector.y, normalizedVector.x) * Mathf.Rad2Deg;
+        if (angle < 0) {
+            angle += 360;
+        }
+        //Assigning angle to the line
+        rt.localEulerAngles = new Vector3(0, 0, angle);
     }
 }
 //For Testing
 //https://www.youtube.com/watch?v=TyxDg70hc3g
+
+//arctan  = tan with power -1
+// tan (theta) = perpendicular /base
+// (theta) = tan(power of -1) of (perpendicular /base)
